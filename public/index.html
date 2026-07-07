@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KT中国留学生促销确认书</title>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f4f5f7; color: #111827; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 18px 14px 40px; }
+    .card { background: #fff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; border: 1px solid #e5e7eb; }
+    .head { padding: 18px 18px 12px; }
+    h1 { margin: 0; font-size: 20px; line-height: 1.35; }
+    .sub { margin: 8px 0 0; color: #6b7280; font-size: 14px; line-height: 1.55; }
+    .pdfbox { background: #e5e7eb; padding: 10px; }
+    iframe { width: 100%; height: 68vh; border: 0; border-radius: 10px; background: #fff; }
+    .form { padding: 18px; }
+    label { display: block; font-weight: 700; margin: 14px 0 8px; }
+    input[type="text"] { width: 100%; height: 46px; border: 1px solid #d1d5db; border-radius: 12px; padding: 0 14px; font-size: 18px; }
+    .signbox { border: 1.5px dashed #9ca3af; border-radius: 14px; background: #fff; overflow: hidden; touch-action: none; }
+    canvas { width: 100%; height: 190px; display: block; }
+    .row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    .muted { color: #6b7280; font-size: 13px; line-height: 1.5; }
+    .check { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 14px; line-height: 1.55; }
+    .check input { margin-top: 4px; transform: scale(1.2); }
+    button { border: 0; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    .clear { background: #eef2f7; color: #374151; padding: 10px 13px; }
+    .submit { width: 100%; height: 52px; background: #111827; color: #fff; margin-top: 18px; font-size: 17px; }
+    .submit:disabled { background: #9ca3af; cursor: not-allowed; }
+    .status { margin-top: 14px; padding: 12px; border-radius: 12px; display: none; font-size: 14px; line-height: 1.5; }
+    .ok { display: block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .err { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="head">
+        <h1>KT中国留学生促销1年合约及名义变更确认书</h1>
+        <p class="sub">请确认下方确认书内容后，填写姓名并在签名栏内签名。</p>
+      </div>
+      <div class="pdfbox">
+        <iframe src="/pledge.pdf#toolbar=0&navpanes=0&scrollbar=1"></iframe>
+      </div>
+      <form class="form" id="pledgeForm">
+        <label for="customerName">姓名</label>
+        <input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="请输入姓名" required />
+
+        <label>签名</label>
+        <div class="signbox">
+          <canvas id="signCanvas"></canvas>
+        </div>
+        <div class="row">
+          <button type="button" class="clear" id="clearBtn">重新签名</button>
+          <span class="muted">请用手指在上方区域签名。</span>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="agree" required />
+          <span>本人已确认以上全部内容，并理解且同意提交本确认书。</span>
+        </label>
+
+        <button class="submit" id="submitBtn" type="submit">提交</button>
+        <div id="status" class="status"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const { PDFDocument } = PDFLib;
+    const canvas = document.getElementById('signCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusBox = document.getElementById('status');
+    let drawing = false;
+    let signed = false;
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const old = canvas.toDataURL();
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#111827';
+      if (!signed) clearCanvas();
+    }
+
+    function clearCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      signed = false;
+    }
+
+    function point(event) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = event.touches && event.touches[0] ? event.touches[0] : event;
+      return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+    }
+
+    function start(event) {
+      event.preventDefault();
+      drawing = true;
+      signed = true;
+      const p = point(event);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }
+
+    function move(event) {
+      if (!drawing) return;
+      event.preventDefault();
+      const p = point(event);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+    }
+
+    function end(event) {
+      if (!drawing) return;
+      event.preventDefault();
+      drawing = false;
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end, { passive: false });
+    document.getElementById('clearBtn').addEventListener('click', clearCanvas);
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function todayChinaStyle() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}年 ${mm}月 ${dd}日`;
+    }
+
+    function textToPngDataUrl(text, width, height, fontSize = 28) {
+      const c = document.createElement('canvas');
+      const ratio = Math.max(window.devicePixelRatio || 1, 2);
+      c.width = width * ratio;
+      c.height = height * ratio;
+      const g = c.getContext('2d');
+      g.scale(ratio, ratio);
+      g.clearRect(0, 0, width, height);
+      g.fillStyle = '#111827';
+      g.font = `${fontSize}px "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif`;
+      g.textBaseline = 'middle';
+      g.fillText(text, 0, height / 2);
+      return c.toDataURL('image/png');
+    }
+
+    async function makeStampedPdf(name) {
+      const sourceBytes = await fetch('/pledge.pdf').then(r => r.arrayBuffer());
+      const pdfDoc = await PDFDocument.load(sourceBytes);
+      const page = pdfDoc.getPages()[0];
+
+      // A4 PDF coordinates. 왼쪽 아래가 0,0 기준.
+      const datePng = await pdfDoc.embedPng(textToPngDataUrl(todayChinaStyle(), 260, 48, 26));
+      const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 260, 48, 28));
+      const signPng = await pdfDoc.embedPng(canvas.toDataURL('image/png'));
+
+      // 현재 PDF 하단 필드에 맞춘 좌표. 필요 시 x/y 숫자만 조정하면 됨.
+      page.drawImage(datePng, { x: 196, y: 171, width: 112, height: 20 });
+      page.drawImage(namePng, { x: 354, y: 171, width: 110, height: 20 });
+      page.drawImage(signPng, { x: 468, y: 158, width: 66, height: 38 });
+
+      return await pdfDoc.save();
+    }
+
+    function showStatus(type, text) {
+      statusBox.className = `status ${type}`;
+      statusBox.textContent = text;
+    }
+
+    document.getElementById('pledgeForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const name = document.getElementById('customerName').value.trim();
+      if (!name) return showStatus('err', '请输入姓名。');
+      if (!signed) return showStatus('err', '请先完成签名。');
+      if (!document.getElementById('agree').checked) return showStatus('err', '请确认并勾选同意事项。');
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '提交中...';
+      showStatus('ok', '正在生成确认书并发送，请稍等。');
+
+      try {
+        const pdfBytes = await makeStampedPdf(name);
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, date: todayChinaStyle(), pdfBase64: base64 })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || '发送失败');
+        showStatus('ok', '提交完成。您的确认书已成功提交。');
+        event.target.reset();
+        clearCanvas();
+      } catch (error) {
+        showStatus('err', '提交失败。请稍后再试或联系工作人员。');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提交';
+      }
+    });
+  </script>
+</body>
+</html>
