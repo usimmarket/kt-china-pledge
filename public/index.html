@@ -223,7 +223,7 @@
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
-      return `${yyyy}年 ${mm}月 ${dd}日`;
+      return `${yyyy}.${mm}.${dd}`;
     }
 
     function textToPngDataUrl(text, width, height, fontSize = 28) {
@@ -246,13 +246,13 @@
       const pdfDoc = await PDFDocument.load(sourceBytes);
       const page = pdfDoc.getPages()[0];
 
-      const datePng = await pdfDoc.embedPng(textToPngDataUrl(todayChinaStyle(), 280, 52, 26));
-      const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 280, 52, 28));
+      const datePng = await pdfDoc.embedPng(textToPngDataUrl(todayChinaStyle(), 220, 52, 26));
+      const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 420, 52, 28));
       const signPng = await pdfDoc.embedPng(canvas.toDataURL('image/png'));
 
-      page.drawImage(datePng, { x: 196, y: 118, width: 112, height: 20 });
-      page.drawImage(namePng, { x: 354, y: 118, width: 110, height: 20 });
-      page.drawImage(signPng, { x: 468, y: 111, width: 66, height: 38 });
+      page.drawImage(datePng, { x: 188, y: 118, width: 88, height: 20 });
+      page.drawImage(namePng, { x: 330, y: 118, width: 160, height: 20 });
+      page.drawImage(signPng, { x: 454, y: 111, width: 66, height: 38 });
 
       return await pdfDoc.save();
     }
