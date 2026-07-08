@@ -2,52 +2,135 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>KT中国留学生促销确认书</title>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f4f5f7; color: #111827; }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 18px 14px 40px; }
-    .card { background: #fff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; border: 1px solid #e5e7eb; }
-    .head { padding: 18px 18px 12px; }
-    h1 { margin: 0; font-size: 20px; line-height: 1.35; }
-    .sub { margin: 8px 0 0; color: #6b7280; font-size: 14px; line-height: 1.55; }
-    .pdfbox { background: #e5e7eb; padding: 10px; }
-    iframe { width: 100%; height: 68vh; border: 0; border-radius: 10px; background: #fff; }
-    .form { padding: 18px; }
-    label { display: block; font-weight: 700; margin: 14px 0 8px; }
-    input[type="text"] { width: 100%; height: 46px; border: 1px solid #d1d5db; border-radius: 12px; padding: 0 14px; font-size: 18px; }
-    .signbox { border: 1.5px dashed #9ca3af; border-radius: 14px; background: #fff; overflow: hidden; touch-action: none; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+      background: #f3f5f8;
+      color: #111827;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 14px 12px 34px; }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(17, 24, 39, .08);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    .head { padding: 16px 17px 13px; border-bottom: 1px solid #eef0f3; }
+    .head-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .head-text { min-width: 0; flex: 1 1 auto; }
+    .brand-logo { width: 112px; max-width: 34%; height: auto; display: block; flex: 0 0 auto; object-fit: contain; }
+    h1 { margin: 0; font-size: 21px; line-height: 1.35; letter-spacing: -.2px; }
+    .sub { margin: 9px 0 0; color: #6b7280; font-size: 14px; line-height: 1.55; }
+    .doc {
+      padding: 18px 17px 8px;
+      font-size: 16px;
+      line-height: 1.8;
+      word-break: break-word;
+    }
+    .doc-title {
+      margin: 0 0 14px;
+      font-size: 19px;
+      line-height: 1.45;
+      font-weight: 900;
+      text-align: center;
+    }
+    .intro { margin: 0 0 12px; }
+    .doc ol { margin: 0; padding-left: 22px; }
+    .doc li { margin: 0 0 9px; padding-left: 2px; }
+    .notice {
+      margin: 14px 0 0;
+      padding: 12px 13px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .form { padding: 16px 17px 20px; }
+    label.label { display: block; font-weight: 800; margin: 13px 0 8px; font-size: 15px; }
+    input[type="text"] {
+      width: 100%;
+      height: 48px;
+      border: 1px solid #d1d5db;
+      border-radius: 13px;
+      padding: 0 14px;
+      font-size: 18px;
+      outline: none;
+      background: #fff;
+    }
+    input[type="text"]:focus { border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.08); }
+    .signbox {
+      border: 1.5px dashed #9ca3af;
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      touch-action: none;
+    }
     canvas { width: 100%; height: 190px; display: block; }
     .row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
     .muted { color: #6b7280; font-size: 13px; line-height: 1.5; }
-    .check { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 14px; line-height: 1.55; }
-    .check input { margin-top: 4px; transform: scale(1.2); }
-    button { border: 0; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    .check { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: 15px; line-height: 1.55; font-weight: 700; }
+    .check input { margin-top: 5px; width: 18px; height: 18px; flex: 0 0 auto; }
+    button { border: 0; border-radius: 12px; font-weight: 900; cursor: pointer; }
     .clear { background: #eef2f7; color: #374151; padding: 10px 13px; }
-    .submit { width: 100%; height: 52px; background: #111827; color: #fff; margin-top: 18px; font-size: 17px; }
+    .submit { width: 100%; height: 54px; background: #111827; color: #fff; margin-top: 18px; font-size: 18px; }
     .submit:disabled { background: #9ca3af; cursor: not-allowed; }
-    .status { margin-top: 14px; padding: 12px; border-radius: 12px; display: none; font-size: 14px; line-height: 1.5; }
+    .status { margin-top: 14px; padding: 12px; border-radius: 12px; display: none; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
     .ok { display: block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .err { display: block; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .pdf-link { margin-top: 12px; text-align: center; font-size: 13px; }
+    .pdf-link a { color: #374151; }
+    @media (max-width: 430px) {
+      .brand-logo { width: 90px; max-width: 31%; }
+      h1 { font-size: 19px; }
+      .sub { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="card">
       <div class="head">
-        <h1>KT中国留学生促销1年合约及名义变更确认书</h1>
-        <p class="sub">请确认下方确认书内容后，填写姓名并在签名栏内签名。</p>
+        <div class="head-inner">
+          <div class="head-text">
+            <h1>KT中国留学生促销1年合约及名义变更确认书</h1>
+            <p class="sub">请确认以下内容后，填写姓名并在签名栏内签名。</p>
+          </div>
+          <img class="brand-logo" src="/logo.png" alt="STANDARD MOBILE" />
+        </div>
       </div>
-      <div class="pdfbox">
-        <iframe src="/pledge.pdf#toolbar=0&navpanes=0&scrollbar=1"></iframe>
-      </div>
+
+      <article class="doc" aria-label="确认书内容">
+        <h2 class="doc-title">KT中国留学生促销1年合约及名义变更确认书</h2>
+        <p class="intro">本人已充分确认并理解与KT中国留学生优惠活动相关的以下内容。</p>
+        <ol>
+          <li>本优惠活动以1年合约为条件进行，必须至少维持使用6个月以上。</li>
+          <li>本优惠活动所提供的月费折扣及3个月免费优惠，均以1年合约为条件提供。</li>
+          <li>月费折扣仅在最初1年合约期间内适用。如在1年后仍希望继续享受月费折扣并继续使用，需重新办理续约。</li>
+          <li>如在1年合约期内解约，可能会产生违约金或折扣返还金。</li>
+          <li>如在1年合约期满后解约，则不会产生违约金。</li>
+          <li>但是，暂停使用期间不计入最低维持使用期间。例如，如暂停使用2个月，则最低维持使用期间将由原来的6个月延长为共8个月。</li>
+          <li>首次开通后3个月内，必须登记外国人登录证信息和自动转账银行账户，并完成相应的名义变更手续。</li>
+          <li>3个月免费优惠活动结束后，每月通信费用将从已登记的自动转账银行账户中自动扣款。</li>
+          <li>本人已确认以上全部内容，并理解且同意合约期限、最低维持使用期间、名义变更义务以及自动转账缴费条件。</li>
+        </ol>
+        <div class="notice">提交后，将自动生成带有提交日期、姓名及签名的确认书PDF，并发送给工作人员。</div>
+        <div class="pdf-link"><a href="/pledge.pdf" target="_blank" rel="noopener">查看原始PDF</a></div>
+      </article>
+
       <form class="form" id="pledgeForm">
-        <label for="customerName">姓名</label>
+        <label class="label" for="customerName">姓名</label>
         <input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="请输入姓名" required />
 
-        <label>签名</label>
+        <label class="label">签名</label>
         <div class="signbox">
           <canvas id="signCanvas"></canvas>
         </div>
@@ -78,11 +161,10 @@
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      const old = canvas.toDataURL();
       canvas.width = Math.round(rect.width * ratio);
       canvas.height = Math.round(rect.height * ratio);
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2.6;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = '#111827';
@@ -160,21 +242,29 @@
     }
 
     async function makeStampedPdf(name) {
-      const sourceBytes = await fetch('/pledge.pdf').then(r => r.arrayBuffer());
+      const sourceBytes = await fetch('/pledge.pdf', { cache: 'no-store' }).then(r => r.arrayBuffer());
       const pdfDoc = await PDFDocument.load(sourceBytes);
       const page = pdfDoc.getPages()[0];
 
-      // A4 PDF coordinates. 왼쪽 아래가 0,0 기준.
-      const datePng = await pdfDoc.embedPng(textToPngDataUrl(todayChinaStyle(), 260, 48, 26));
-      const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 260, 48, 28));
+      const datePng = await pdfDoc.embedPng(textToPngDataUrl(todayChinaStyle(), 280, 52, 26));
+      const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 280, 52, 28));
       const signPng = await pdfDoc.embedPng(canvas.toDataURL('image/png'));
 
-      // 현재 PDF 하단 필드에 맞춘 좌표. 필요 시 x/y 숫자만 조정하면 됨.
       page.drawImage(datePng, { x: 196, y: 171, width: 112, height: 20 });
       page.drawImage(namePng, { x: 354, y: 171, width: 110, height: 20 });
       page.drawImage(signPng, { x: 468, y: 158, width: 66, height: 38 });
 
       return await pdfDoc.save();
+    }
+
+    function bytesToBase64(bytes) {
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk);
+      }
+      return btoa(binary);
     }
 
     function showStatus(type, text) {
@@ -195,20 +285,24 @@
       showStatus('ok', '正在生成确认书并发送，请稍等。');
 
       try {
+        if (!window.PDFLib) throw new Error('PDF library not loaded');
         const pdfBytes = await makeStampedPdf(name);
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+        const base64 = bytesToBase64(new Uint8Array(pdfBytes));
         const res = await fetch('/.netlify/functions/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, date: todayChinaStyle(), pdfBase64: base64 })
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || '发送失败');
+        if (!res.ok) {
+          const detail = data.detail ? `\n${String(data.detail).slice(0, 500)}` : '';
+          throw new Error((data.error || '发送失败') + detail);
+        }
         showStatus('ok', '提交完成。您的确认书已成功提交。');
         event.target.reset();
         clearCanvas();
       } catch (error) {
-        showStatus('err', '提交失败。请稍后再试或联系工作人员。');
+        showStatus('err', '提交失败。请联系工作人员。\n' + String(error.message || error));
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = '提交';
