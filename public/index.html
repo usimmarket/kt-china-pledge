@@ -250,9 +250,9 @@
       const namePng = await pdfDoc.embedPng(textToPngDataUrl(name, 280, 52, 28));
       const signPng = await pdfDoc.embedPng(canvas.toDataURL('image/png'));
 
-      page.drawImage(datePng, { x: 196, y: 126, width: 112, height: 20 });
-      page.drawImage(namePng, { x: 354, y: 126, width: 110, height: 20 });
-      page.drawImage(signPng, { x: 468, y: 119, width: 66, height: 38 });
+      page.drawImage(datePng, { x: 196, y: 118, width: 112, height: 20 });
+      page.drawImage(namePng, { x: 354, y: 118, width: 110, height: 20 });
+      page.drawImage(signPng, { x: 468, y: 111, width: 66, height: 38 });
 
       return await pdfDoc.save();
     }
