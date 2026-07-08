@@ -1,7 +1,10 @@
-export async function onRequestPost(context) {
+exports.handler = async function(event) {
   try {
-    const { request, env } = context;
-    const payload = await request.json();
+    if (event.httpMethod !== 'POST') {
+      return json({ error: 'Method not allowed' }, 405);
+    }
+
+    const payload = JSON.parse(event.body || '{}');
     const name = String(payload.name || '').trim();
     const date = String(payload.date || '').trim();
     const pdfBase64 = String(payload.pdfBase64 || '');
@@ -10,9 +13,9 @@ export async function onRequestPost(context) {
       return json({ error: 'Missing required fields' }, 400);
     }
 
-    const apiKey = env.RESEND_API_KEY;
-    const mailTo = env.MAIL_TO || 'kukidream@gmail.com';
-    const mailFrom = env.MAIL_FROM || 'USIMMARKET <onboarding@resend.dev>';
+    const apiKey = process.env.RESEND_API_KEY;
+    const mailTo = process.env.MAIL_TO || 'kukidream@gmail.com';
+    const mailFrom = process.env.MAIL_FROM || 'USIMMARKET <onboarding@resend.dev>';
 
     if (!apiKey) {
       return json({ error: 'RESEND_API_KEY is not configured' }, 500);
@@ -24,7 +27,7 @@ export async function onRequestPost(context) {
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -54,19 +57,16 @@ export async function onRequestPost(context) {
 
     return json({ ok: true });
   } catch (error) {
-    return json({ error: 'Server error' }, 500);
+    return json({ error: 'Server error', detail: String(error && error.message ? error.message : error) }, 500);
   }
-}
+};
 
-export async function onRequest(context) {
-  return json({ error: 'Method not allowed' }, 405);
-}
-
-function json(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
+function json(body, statusCode = 200) {
+  return {
+    statusCode,
     headers: {
       'Content-Type': 'application/json; charset=utf-8'
-    }
-  });
+    },
+    body: JSON.stringify(body)
+  };
 }
