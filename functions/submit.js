@@ -10,7 +10,7 @@ exports.handler = async function(event) {
     const pdfBase64 = String(payload.pdfBase64 || '');
 
     if (!name || !date || !pdfBase64) {
-      return json({ error: 'Missing required fields' }, 400);
+      return json({ error: 'Missing required fields', detail: 'name, date, pdfBase64 are required.' }, 400);
     }
 
     const apiKey = process.env.RESEND_API_KEY;
@@ -21,7 +21,7 @@ exports.handler = async function(event) {
       return json({ error: 'RESEND_API_KEY is not configured' }, 500);
     }
 
-    const safeName = name.replace(/[\\/:*?"<>|]/g, '_').slice(0, 40);
+    const safeName = name.replace(/[\\/:*?"<>|]/g, '_').slice(0, 40) || 'customer';
     const filename = `KT中国留学生确认书_${safeName}.pdf`;
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
@@ -55,7 +55,8 @@ exports.handler = async function(event) {
       return json({ error: 'Email send failed', detail }, 502);
     }
 
-    return json({ ok: true });
+    const resendData = await resendResponse.json().catch(() => ({}));
+    return json({ ok: true, id: resendData.id || null });
   } catch (error) {
     return json({ error: 'Server error', detail: String(error && error.message ? error.message : error) }, 500);
   }
@@ -65,7 +66,8 @@ function json(body, statusCode = 200) {
   return {
     statusCode,
     headers: {
-      'Content-Type': 'application/json; charset=utf-8'
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store'
     },
     body: JSON.stringify(body)
   };
